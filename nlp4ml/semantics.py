@@ -28,7 +28,7 @@ def co_occurrence_matrix(corpus, vocabulary, window_size=5):
     >>> corpus = ["I love nlp", "nlp stands for natural language processing"]
     >>> vocab = set([term for doc in documents for term in doc])
     >>> co_matrix, vocab_idx = co_occurrence_matrix(corpus, vocab, window_size=1)
-    >>> pd.DataFrame(co_matrix, index=vocab_idx, columns=vocab_idx)
+    >>> pd.DataFrame(co_matrix, index=vocab_idx, columns=vocab_idx, dtype=int)
 
     References
     ----------
@@ -77,10 +77,4 @@ def get_ppmi(matrix):
                                   dtype=np.float64)
     ret.eliminate_zeros()
     return ret
-
-def pretty_print_matrix(M, rows=None, cols=None, dtype=float, float_fmt="{0:.04f}"):
-    df = pd.DataFrame(M, index=rows, columns=cols, dtype=dtype)
-    old_fmt_fn = pd.get_option('float_format')
-    pd.set_option('float_format', lambda f: float_fmt.format(f))
-    display(df)
-    pd.set_option('float_format', old_fmt_fn)
+    

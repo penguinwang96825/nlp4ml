@@ -3,6 +3,7 @@ import sys
 import random
 import zipfile
 import numpy as np
+import pandas as pd
 from tqdm import tqdm
 
 
@@ -46,6 +47,14 @@ def threshold_search(y_true, y_proba):
             best_score = score
     search_result = {'threshold': best_threshold, 'f1': best_score}
     return search_result
+
+
+def pretty_print_matrix(M, rows=None, cols=None, dtype=float, float_fmt="{0:.04f}"):
+    df = pd.DataFrame(M, index=rows, columns=cols, dtype=dtype)
+    old_fmt_fn = pd.get_option('float_format')
+    pd.set_option('float_format', lambda f: float_fmt.format(f))
+    display(df)
+    pd.set_option('float_format', old_fmt_fn)
 
 
 def type_of_columns(data, label_col=None, show=True):
