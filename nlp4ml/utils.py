@@ -13,12 +13,14 @@ def seed_everything(seed=914):
     np.random.seed(seed)
 
 
-def progressbar(self, iteration, prefix="", size=50, file=sys.stdout):
-    count = len(iteration)
+def progressbar(iteration, prefix="", size=50, file=sys.stdout):
+    
     def show(t):
         x = int(size*t/count)
-        file.write("{}[{}{}] {}%\r".format(prefix, "█"*x, "."*(size-x), int(100*t/count)))
+        file.write("{}| {}{} | {}%\r".format(prefix, "█"*x, "."*(size-x), int(100*t/count)))
         file.flush()
+    
+    count = len(iteration)
     show(0)
     for i, item in enumerate(iteration):
         yield item

@@ -1,3 +1,4 @@
+import pandas as pd
 import scipy.stats as stats
 from scipy.stats import chi2_contingency
 
@@ -66,3 +67,22 @@ class ChiSquare:
                 index=self.data_observed.index)
             self.get_result(col_x, alpha)
             self.print_result(col_x, alpha)
+
+
+def under_sampling(df, label_col="label"):
+    print('Before under-sampling:')
+    print(df.label.value_counts())
+
+    # Class count
+    count_class_0, count_class_1 = df.label.value_counts()
+
+    # Divide by class
+    df_class_0 = df[df[label_col] == 0]
+    df_class_1 = df[df[label_col] == 1]
+
+    df_class_0_under = df_class_0.sample(count_class_1)
+    df_under = pd.concat([df_class_0_under, df_class_1], axis=0)
+    print('After under-sampling:')
+    print(df_under.label.value_counts())
+
+    return df_under

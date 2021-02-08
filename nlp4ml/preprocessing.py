@@ -1,10 +1,31 @@
 import re
 import string
+import preprocessor
 import numpy as np
 import pandas as pd
-import preprocessor
+import nlpaug.augmenter.word as naw
+from utils import progressbar
 from wordcloud import STOPWORDS
 from gensim.parsing.preprocessing import remove_stopwords
+
+
+def augment_text(df, text_col, label_col, samples=300):
+    aug = naw.SynonymAug(aug_src='wordnet')
+    aug_text = []
+    
+    # Selecting the minority class samples
+    df_minority = df[df[label_col]==1].reset_index(drop=True)
+
+    # Data augmentation loop
+    for i in progressbar(np.random.randint(0, len(df_minority), samples)):
+        text = df_minority.iloc[i][text_col]
+        augmented_text = aug.augment(text)
+        aug_text.append(augmented_text)
+    
+    df_aug = pd.DataFrame({text_col: aug_text, label_col: 1})
+    df = pd.concat([df, df_aug], axis=0)
+
+    return df
 
 
 def meta_feature(df, text_col):
