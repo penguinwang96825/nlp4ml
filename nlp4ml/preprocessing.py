@@ -1,3 +1,4 @@
+import re
 import string
 import numpy as np
 import pandas as pd
@@ -16,7 +17,7 @@ def meta_feature(df, text_col):
     df['mention_count'] = df[text_col].apply(lambda x: len([c for c in str(x) if c == '@']))
 
 
-def clean_tweet(tweet): 
+def clean_tweet(tweet):
     """
     Parameters
     ----------
@@ -43,14 +44,14 @@ def clean_tweet(tweet):
     tweet = re.sub(r"fromåÊwounds", "from wounds", tweet)
     tweet = re.sub(r"åÊ", "", tweet)
     tweet = re.sub(r"åÈ", "", tweet)
-    tweet = re.sub(r"JapÌ_n", "Japan", tweet)    
+    tweet = re.sub(r"JapÌ_n", "Japan", tweet)
     tweet = re.sub(r"Ì©", "e", tweet)
     tweet = re.sub(r"å¨", "", tweet)
     tweet = re.sub(r"SuruÌ¤", "Suruc", tweet)
     tweet = re.sub(r"åÇ", "", tweet)
     tweet = re.sub(r"å£3million", "3 million", tweet)
     tweet = re.sub(r"åÀ", "", tweet)
-    
+
     # Contractions
     tweet = re.sub(r"he's", "he is", tweet)
     tweet = re.sub(r"there's", "there is", tweet)
@@ -141,14 +142,14 @@ def clean_tweet(tweet):
     tweet = re.sub(r"Ain't", "am not", tweet)
     tweet = re.sub(r"Haven't", "Have not", tweet)
     tweet = re.sub(r"Could've", "Could have", tweet)
-    tweet = re.sub(r"youve", "you have", tweet)  
-    tweet = re.sub(r"donå«t", "do not", tweet)   
-            
+    tweet = re.sub(r"youve", "you have", tweet)
+    tweet = re.sub(r"donå«t", "do not", tweet)
+
     # Character entity references
     tweet = re.sub(r"&gt;", ">", tweet)
     tweet = re.sub(r"&lt;", "<", tweet)
     tweet = re.sub(r"&amp;", "&", tweet)
-    
+
     # Typos, slang and informal abbreviations
     tweet = re.sub(r"w/e", "whatever", tweet)
     tweet = re.sub(r"w/", "with", tweet)
@@ -166,14 +167,14 @@ def clean_tweet(tweet):
     tweet = re.sub(r"10:38PM", "10:38 PM", tweet)
     tweet = re.sub(r"10:30pm", "10:30 PM", tweet)
     tweet = re.sub(r"16yr", "16 year", tweet)
-    tweet = re.sub(r"lmao", "laughing my ass off", tweet)   
+    tweet = re.sub(r"lmao", "laughing my ass off", tweet)
     tweet = re.sub(r"TRAUMATISED", "traumatized", tweet)
-    
+
     # Hashtags and usernames
     tweet = re.sub(r"IranDeal", "Iran Deal", tweet)
     tweet = re.sub(r"ArianaGrande", "Ariana Grande", tweet)
-    tweet = re.sub(r"camilacabello97", "camila cabello", tweet) 
-    tweet = re.sub(r"RondaRousey", "Ronda Rousey", tweet)     
+    tweet = re.sub(r"camilacabello97", "camila cabello", tweet)
+    tweet = re.sub(r"RondaRousey", "Ronda Rousey", tweet)
     tweet = re.sub(r"MTVHottest", "MTV Hottest", tweet)
     tweet = re.sub(r"TrapMusic", "Trap Music", tweet)
     tweet = re.sub(r"ProphetMuhammad", "Prophet Muhammad", tweet)
@@ -233,7 +234,7 @@ def clean_tweet(tweet):
     tweet = re.sub(r"ArtistsUnited", "Artists United", tweet)
     tweet = re.sub(r"ClaytonBryant", "Clayton Bryant", tweet)
     tweet = re.sub(r"jimmyfallon", "jimmy fallon", tweet)
-    tweet = re.sub(r"justinbieber", "justin bieber", tweet)  
+    tweet = re.sub(r"justinbieber", "justin bieber", tweet)
     tweet = re.sub(r"UTC2015", "UTC 2015", tweet)
     tweet = re.sub(r"Time2015", "Time 2015", tweet)
     tweet = re.sub(r"djicemoon", "dj icemoon", tweet)
@@ -733,37 +734,37 @@ def clean_tweet(tweet):
     tweet = re.sub(r"bedhair", "bed hair", tweet)
     tweet = re.sub(r"JoelHeyman", "Joel Heyman", tweet)
     tweet = re.sub(r"viaYouTube", "via YouTube", tweet)
-           
+
     # Urls
     tweet = re.sub(r"https?:\/\/t.co\/[A-Za-z0-9]+", "", tweet)
-        
+
     # Words with punctuations and special characters
     punctuations = '@#!?+&*[]-%.:/();$=><|{}^' + "'`"
     for p in punctuations:
         tweet = tweet.replace(p, f' {p} ')
-        
+
     # ... and ..
     tweet = tweet.replace('...', ' ... ')
     if '...' not in tweet:
-        tweet = tweet.replace('..', ' ... ')      
-        
+        tweet = tweet.replace('..', ' ... ')
+
     # Acronyms
     tweet = re.sub(r"MH370", "Malaysia Airlines Flight 370", tweet)
     tweet = re.sub(r"mÌ¼sica", "music", tweet)
     tweet = re.sub(r"okwx", "Oklahoma City Weather", tweet)
-    tweet = re.sub(r"arwx", "Arkansas Weather", tweet)    
-    tweet = re.sub(r"gawx", "Georgia Weather", tweet)  
-    tweet = re.sub(r"scwx", "South Carolina Weather", tweet)  
+    tweet = re.sub(r"arwx", "Arkansas Weather", tweet)
+    tweet = re.sub(r"gawx", "Georgia Weather", tweet)
+    tweet = re.sub(r"scwx", "South Carolina Weather", tweet)
     tweet = re.sub(r"cawx", "California Weather", tweet)
     tweet = re.sub(r"tnwx", "Tennessee Weather", tweet)
-    tweet = re.sub(r"azwx", "Arizona Weather", tweet)  
+    tweet = re.sub(r"azwx", "Arizona Weather", tweet)
     tweet = re.sub(r"alwx", "Alabama Weather", tweet)
-    tweet = re.sub(r"wordpressdotcom", "wordpress", tweet)    
+    tweet = re.sub(r"wordpressdotcom", "wordpress", tweet)
     tweet = re.sub(r"usNWSgov", "United States National Weather Service", tweet)
-    tweet = re.sub(r"Suruc", "Sanliurfa", tweet)   
-    
+    tweet = re.sub(r"Suruc", "Sanliurfa", tweet)
+
     # Grouping same words without embeddings
     tweet = re.sub(r"Bestnaijamade", "bestnaijamade", tweet)
     tweet = re.sub(r"SOUDELOR", "Soudelor", tweet)
-    
+
     return tweet
