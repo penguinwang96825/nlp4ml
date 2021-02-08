@@ -3,9 +3,11 @@ from setuptools import find_packages
 from setuptools import setup
 
 
-# First time install this library
-# python setup.py bdist_wheel
-# pip install dist/sk_ensembler-0.1.0-py3-none-any.whl
+# Update
+# Delete all the file in the dist folder
+# Update the version in the setup.py file
+# python setup.py sdist bdist_wheel
+# twine upload dist/*
 
 
 lib_folder = os.path.dirname(os.path.realpath(__file__))
