@@ -140,3 +140,4 @@ cython_debug/
 # Custom
 nlp4ml.egg-info/
 data/
+embedding/
