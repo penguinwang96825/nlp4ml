@@ -16,7 +16,7 @@ def meta_feature(df, text_col):
     df['mention_count'] = df[text_col].apply(lambda x: len([c for c in str(x) if c == '@']))
 
 
-def clean(tweet): 
+def clean_tweet(tweet): 
     """
     Parameters
     ----------
