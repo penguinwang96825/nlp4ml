@@ -19,9 +19,11 @@ if os.path.isfile(requirements_path):
 setup(
     name='nlp4ml',
     packages=find_packages(include=['nlp4ml']),
-    version='0.1.0',
+    version='0.1.1',
     description='Python NLP wrapper',
     author='Yang Wang',
+    author_email='penguinwang@smail.nchu.edu.tw', 
+    url='https://github.com/penguinwang96825/nlp4ml.git', 
     license='MIT',
     install_requires=install_requires,
     tests_require=['pytest==4.4.1'],
