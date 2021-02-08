@@ -21,7 +21,7 @@ if os.path.isfile(requirements_path):
 setup(
     name='nlp4ml',
     packages=find_packages(include=['nlp4ml']),
-    version='0.1.5',
+    version='0.1.6',
     description='Python NLP wrapper',
     author='Yang Wang',
     author_email='penguinwang@smail.nchu.edu.tw',

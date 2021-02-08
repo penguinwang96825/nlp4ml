@@ -19,7 +19,7 @@ def meta_feature(df, text_col):
     df['mention_count'] = df[text_col].apply(lambda x: len([c for c in str(x) if c == '@']))
 
 
-def clean_tweet(tweet, strip_stopwords=False):
+def clean_tweet(tweet, strip_stopwords=False, strip_punctuation=False):
     """
     Parameters
     ----------
@@ -138,6 +138,7 @@ def clean_tweet(tweet, strip_stopwords=False):
     tweet = re.sub(r"amirite", "am I right", tweet)
     tweet = re.sub(r"exp0sed", "exposed", tweet)
     tweet = re.sub(r"<3", "love", tweet)
+    tweet = re.sub(r"lol", "laugh out loud", tweet)
     tweet = re.sub(r"amageddon", "armageddon", tweet)
     tweet = re.sub(r"Trfc", "Traffic", tweet)
     tweet = re.sub(r"8/5/2015", "2015-08-05", tweet)
@@ -161,7 +162,12 @@ def clean_tweet(tweet, strip_stopwords=False):
     if strip_stopwords:
         tweet = remove_stopwords(tweet)
 
-    # Remove extra white spaces and punctuation
-    tweet = tweet.replace('[^\w\s]',' ').str.replace('\s\s+', ' ')
+    # Remove punctuation
+    if strip_punctuation:
+        tweet = re.sub(r'[^\w\s]', '', tweet)
+
+    # Remove multiple spaces in a string
+    tweet = re.sub(' +', ' ', tweet)
+    tweet = tweet.strip()
 
     return tweet
