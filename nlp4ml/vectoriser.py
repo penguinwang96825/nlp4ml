@@ -1,7 +1,9 @@
 import sys
 import numpy as np
+from collections import Counter
 from sklearn.base import BaseEstimator, TransformerMixin
 from gensim.models import KeyedVectors
+from sklearn.decomposition import TruncatedSVD
 
 
 class EmbeddingVectorizer(BaseEstimator, TransformerMixin):
@@ -9,13 +11,13 @@ class EmbeddingVectorizer(BaseEstimator, TransformerMixin):
     def __init__(self):
         pass
 
-    def fit(self, X, y):
+    def fit(self, X, y=None):
         return self
 
     def transform(self):
         return X
 
-    def fit_transform(self, X, y):
+    def fit_transform(self, X, y=None):
         self.fit(X, y)
 
     def progressbar(self, iteration, prefix="", size=50, file=sys.stdout):
@@ -58,7 +60,7 @@ class MeanEmbeddingVectorizer(EmbeddingVectorizer):
         self.word2vec = word2vec
         self.dim = word2vec.vector_size
 
-    def fit(self, X, y):
+    def fit(self, X, y=None):
         return self
 
     def transform(self, X):
@@ -68,7 +70,7 @@ class MeanEmbeddingVectorizer(EmbeddingVectorizer):
             for words in self.progressbar(X, prefix="Mean")
         ])
 
-    def fit_transform(self, X, y):
+    def fit_transform(self, X, y=None):
         self.fit(X, y)
         return self.transform(X)
 
@@ -117,7 +119,7 @@ class TfidfEmbeddingVectorizer(EmbeddingVectorizer):
         term_freq = [(term, term_freq[term]/total_len) for term, count in term_freq.items()]
         return dict(term_freq)
 
-    def fit(self, X, y):
+    def fit(self, X, y=None):
         tfidf = TfidfVectorizer(analyzer=lambda x: x)
         tfidf.fit(X)
         max_idf = max(tfidf.idf_)
@@ -141,7 +143,7 @@ class TfidfEmbeddingVectorizer(EmbeddingVectorizer):
             transformed_X.append(weighted_array)
         return np.array(transformed_X)
 
-    def fit_transform(self, X, y):
+    def fit_transform(self, X, y=None):
         self.fit(X, y)
         return self.transform(X)
 
@@ -189,7 +191,7 @@ class SifEmbeddingVectorizer(EmbeddingVectorizer):
         term_freq = [(term, term_freq[term]/total_len) for term, count in term_freq.items()]
         return dict(term_freq)
 
-    def fit(self, X, y):
+    def fit(self, X, y=None):
         return self
 
     def transform(self, X):
@@ -213,7 +215,7 @@ class SifEmbeddingVectorizer(EmbeddingVectorizer):
         transformed_X = transformed_X - transformed_X.dot(pc.T).dot(pc)
         return transformed_X
 
-    def fit_transform(self, X, y):
+    def fit_transform(self, X, y=None):
         self.fit(X, y)
         return self.transform(X)
 

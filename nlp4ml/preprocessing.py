@@ -1,12 +1,101 @@
 import re
 import string
+import warnings
 import preprocessor
 import numpy as np
 import pandas as pd
 import nlpaug.augmenter.word as naw
-from utils import progressbar
+from sklearn import model_selection
 from wordcloud import STOPWORDS
 from gensim.parsing.preprocessing import remove_stopwords
+warnings.filterwarnings("ignore")
+
+
+from nlp4ml.utils import progressbar
+
+
+class KFold:
+    """
+    Parameters
+    ----------
+    n_splits: int
+    task: str {"regression", "classification"}
+
+    Examples
+    --------
+    >>> splitter = KFold(n_splits=5)
+    >>> dfx = splitter.split(dfx, target_col="label")
+    """
+    def __init__(self, n_splits, task="classification"):
+        self.n_splits = n_splits
+        self.task = task
+
+    def split_df(self, df, target_col, shuffle=True):
+        if self.task == "regression":
+            df = self.create_folds_for_regression(df, target_col, shuffle=shuffle)
+        elif self.task == "classification":
+            df = self.create_folds_for_classification(df, target_col, shuffle=shuffle)
+        return df
+
+    def create_folds_for_regression(self, df, target_col, shuffle=True):
+        df["kfold"] = -1
+        if shuffle:
+            df = df.sample(frac=1).reset_index(drop=True)
+        num_bins = np.floor(1+np.log2(len(df)))
+        df.loc[:, "bins"] = pd.cut(df[target_col], bins=num_bins, labels=False)
+        kf = model_selection.StratifiedKFold(n_splits=self.n_splits)
+        for f, (t_, v_) in enumerate(kf.split(X=df, y=df.bins.values)):
+            df.loc[v_, 'kfold'] = f
+        df = df.drop("bins", axis=1)
+        return df
+
+    def create_folds_for_classification(self, df, target_col, shuffle=True):
+        df["kfold"] = -1
+        if shuffle:
+            df = df.sample(frac=1).reset_index(drop=True)
+        y = df[target_col].values
+        kf = model_selection.StratifiedKFold(n_splits=self.n_splits)
+        for f, (t_, v_) in enumerate(kf.split(X=df, y=y)):
+            df.loc[v_, 'kfold'] = f
+        return df
+
+    def split_X_y(self, X, y, shuffle=True):
+        if self.task == "regression":
+            df = self.create_X_y_folds_for_regression(X, y, shuffle=shuffle)
+        elif self.task == "classification":
+            df = self.create_X_y_folds_for_classification(X, y, shuffle=shuffle)
+        return df
+
+    def create_X_y_folds_for_regression(self, X, y, shuffle=True):
+        col_names = [f"col_{i}" for i in range(X.shape[1])]
+        X = pd.DataFrame(X, columns=col_names)
+        y = pd.DataFrame(y, columns=["label"])
+        df = pd.concat([X, y], axis=1)
+
+        df["kfold"] = -1
+        if shuffle:
+            df = df.sample(frac=1).reset_index(drop=True)
+        num_bins = np.floor(1+np.log2(len(df)))
+        df.loc[:, "bins"] = pd.cut(y.label, bins=num_bins, labels=False)
+        kf = model_selection.StratifiedKFold(n_splits=self.n_splits)
+        for f, (t_, v_) in enumerate(kf.split(X=df, y=df.bins.values)):
+            df.loc[v_, 'kfold'] = f
+        df = df.drop("bins", axis=1)
+        return df
+
+    def create_X_y_folds_for_classification(self, X, y, shuffle=True):
+        col_names = [f"col_{i}" for i in range(X.shape[1])]
+        X = pd.DataFrame(X, columns=col_names)
+        y = pd.DataFrame(y, columns=["label"])
+        df = pd.concat([X, y], axis=1)
+
+        df["kfold"] = -1
+        if shuffle:
+            df = df.sample(frac=1).reset_index(drop=True)
+        kf = model_selection.StratifiedKFold(n_splits=self.n_splits)
+        for f, (t_, v_) in enumerate(kf.split(X=df, y=y.label.values)):
+            df.loc[v_, 'kfold'] = f
+        return df
 
 
 def augment_text(df, text_col, label_col, samples=300):
@@ -24,20 +113,22 @@ def augment_text(df, text_col, label_col, samples=300):
     
     df_aug = pd.DataFrame({text_col: aug_text, label_col: 1})
     df = pd.concat([df, df_aug], axis=0)
+    df = df.reset_index(drop=True)
 
     return df
 
 
 def meta_feature(df, text_col):
-    df['word_count'] = df[text_col].apply(lambda x: len(str(x).split()))
-    df['unique_word_count'] = df[text_col].apply(lambda x: len(set(str(x).split())))
-    df['stop_word_count'] = df[text_col].apply(lambda x: len([w for w in str(x).lower().split() if w in STOPWORDS]))
-    df['url_count'] = df[text_col].apply(lambda x: len([w for w in str(x).lower().split() if 'http' in w or 'https' in w]))
-    df['mean_word_length'] = df[text_col].apply(lambda x: np.mean([len(w) for w in str(x).split()]))
-    df['char_count'] = df[text_col].apply(lambda x: len(str(x)))
-    df['punctuation_count'] = df[text_col].apply(lambda x: len([c for c in str(x) if c in string.punctuation]))
-    df['hashtag_count'] = df[text_col].apply(lambda x: len([c for c in str(x) if c == '#']))
-    df['mention_count'] = df[text_col].apply(lambda x: len([c for c in str(x) if c == '@']))
+    df.loc[:, 'word_count'] = df.loc[:, text_col].apply(lambda x: len(str(x).split()))
+    df.loc[:, 'unique_word_count'] = df.loc[:, text_col].apply(lambda x: len(set(str(x).split())))
+    df.loc[:, 'stop_word_count'] = df.loc[:, text_col].apply(lambda x: len([w for w in str(x).lower().split() if w in STOPWORDS]))
+    df.loc[:, 'url_count'] = df.loc[:, text_col].apply(lambda x: len([w for w in str(x).lower().split() if 'http' in w or 'https' in w]))
+    df.loc[:, 'mean_word_length'] = df.loc[:, text_col].apply(lambda x: np.mean([len(w) for w in str(x).split()]))
+    df.loc[:, 'char_count'] = df.loc[:, text_col].apply(lambda x: len(str(x)))
+    df.loc[:, 'punctuation_count'] = df.loc[:, text_col].apply(lambda x: len([c for c in str(x) if c in string.punctuation]))
+    df.loc[:, 'hashtag_count'] = df.loc[:, text_col].apply(lambda x: len([c for c in str(x) if c == '#']))
+    df.loc[:, 'mention_count'] = df.loc[:, text_col].apply(lambda x: len([c for c in str(x) if c == '@']))
+    return df
 
 
 def clean_tweet(tweet, strip_stopwords=False, strip_punctuation=False):
