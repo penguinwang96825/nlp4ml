@@ -12,3 +12,4 @@ tweet-preprocessor==0.6.0
 regex==2020.11.13
 nlpaug==0.0.9
 texttable==1.6.3
+wordcloud==1.8.1

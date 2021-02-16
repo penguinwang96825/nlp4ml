@@ -4,6 +4,8 @@ from collections import Counter
 from sklearn.base import BaseEstimator, TransformerMixin
 from gensim.models import KeyedVectors
 from sklearn.decomposition import TruncatedSVD
+from sklearn.preprocessing import LabelBinarizer
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 
 
 class EmbeddingVectorizer(BaseEstimator, TransformerMixin):
@@ -165,6 +167,7 @@ class SifEmbeddingVectorizer(EmbeddingVectorizer):
         FastText: https://fasttext.cc/docs/en/crawl-vectors.html
     smoothing_constant: float (default: 1e-3)
         Default value of smoothing constant suggested in the paper is 0.001.
+        The range of a suggested in the paper: [1e−4, 1e−3]
 
     Examples
     --------
@@ -184,14 +187,14 @@ class SifEmbeddingVectorizer(EmbeddingVectorizer):
         self.word2weight = None
         self.dim = word2vec.vector_size
         self.smoothing_constant = smoothing_constant
-
-    def word2tf(self, term_list):
-        term_freq = Counter(term_list)
-        total_len = sum(term_freq.values())
-        term_freq = [(term, term_freq[term]/total_len) for term, count in term_freq.items()]
-        return dict(term_freq)
+        self.term_freq = None
 
     def fit(self, X, y=None):
+        X_list = [item for sublist in X for item in sublist]
+        term_freq = Counter(X_list)
+        total_len = sum(term_freq.values())
+        term_freq = [(term, term_freq[term]/total_len) for term, count in term_freq.items()]
+        self.term_freq = dict(term_freq)
         return self
 
     def transform(self, X):
@@ -201,7 +204,7 @@ class SifEmbeddingVectorizer(EmbeddingVectorizer):
             for term in doc:
                 if term in self.word2vec:
                     # Compute smooth inverse frequency (SIF)
-                    weight = self.smoothing_constant / (self.smoothing_constant + self.word2tf(doc)[term])
+                    weight = self.smoothing_constant / (self.smoothing_constant + self.term_freq.get(term, 0))
                     weighted_term = self.word2vec[term] * weight
                     weighted_array.append(weighted_term)
             weighted_array = np.mean(weighted_array or [np.zeros(self.dim)], axis=0)
